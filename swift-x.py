@@ -107,11 +107,9 @@ def parse_config(args, path):
 		if "$" in kv[1]:
 			unresolved = add_unresolved_symbols(config, unresolved, kv[1])
 
-	if args.verbose > 0:
+	if len(unresolved):
 		for key in unresolved.keys():
 			print "unresolved symbol " + key
-		if len(unresolved):
-			print "\n"
 
 	return config
 
