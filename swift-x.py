@@ -14,17 +14,19 @@ def build_objc_sources(args, config, sources):
 
 	for s in sources:
 
-		# determine target
-		target = os.path.splitext(s)[0] + ".ir"
-
 		# create the build command and replace unknowns
+		# this is the first build step from .m(m) => IR
 		if s.endswith(".mm"):
 			key = 'OBJC_C++'
 		else:
 			key = 'OBJC'
-		cc = get_var(key, config, {'TARGET' : target})
-		
+		cc = get_var(key, config, {'TARGET' : os.path.splitext(s)[0] + ".ir", 'SOURCE' : s})
 		print "EXEC: " + cc + "\n"
+
+		# now to convert the IR to a .o
+		llc = get_var('ANDROID_LLC', config, {'TARGET' : os.path.splitext(s)[0] + ".o", 'SOURCE' : os.path.splitext(s)[0] + ".ir"})
+		print "EXEC: " + llc + "\n"
+
 
 def build_swift_sources(args, config, sources):
 	
@@ -39,13 +41,13 @@ def build_swift_sources(args, config, sources):
 		# so we create a temp array that contains the remaining sources
 		remain = ' '.join([v for v in sources if not v == s])
 
-		# determine target
-		target = os.path.splitext(s)[0] + ".ir"
-
 		# create the build command and replace unknowns
-		cc = get_var('SWIFT_CC', config, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : target})
-		
+		cc = get_var('SWIFT_CC', config, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : os.path.splitext(s)[0] + ".ir", 'SOURCE' : s})		
 		print "EXEC: " + cc + "\n"
+
+		# now to convert the IR to a .o
+		llc = get_var('ANDROID_LLC', config, {'TARGET' : os.path.splitext(s)[0] + ".o", 'SOURCE' : os.path.splitext(s)[0] + ".ir"})
+		print "EXEC: " + llc + "\n"
 
 
 def add_unresolved_symbols(config, unresolved, value):
