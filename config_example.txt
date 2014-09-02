@@ -1,4 +1,7 @@
 
+# module name
+MODULE_NAME = Test
+
 # path to xcode application/toolchain
 XCODE = /Applications/Xcode6-Beta6.app 
 
@@ -11,18 +14,28 @@ ANDROID_NDK = /Users/justin/android/android-ndk-r10
 # includes to add to 
 OBJC_INCLUDES = -I$(XCODE)/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk/usr/include
 SWIFT_INCLUDES = -Xcc -I.
+SYSROOT = .
+
+# built in symbols
+INTRINSIC_SYMBOLS = \
+	PRIMARY_FILE \
+	TARGET \
+	SWIFT_SOURCES 
 
 # options for compiling objective-c -> LLVM-IR
-OBJC = -c \
+OBJC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang \
+	-x objective-c++ \
+	-arch armv7 \
+	-c \
 	-emit-llvm \
 	-fno-short-enums \
 	-fPIC \
 	-isysroot $(SYSROOT) \
-	-DUSE_FILE32API -DCC_TARGET_OS_ANDROID -DCOCOS2D_DEBUG=1 -DCC_ENABLE_CHIPMUNK_INTEGRATION=1 \
 	-D_POSIX_C_SOURCE \
 	-D__NDK_FPABI__='' \
 	-DANDROID \
 	$(OBJC_INCLUDES) \
+	-o $(TARGET) \
 	-S
 
 # options for compiling objective-c++ -> LLVM-IR
@@ -36,12 +49,12 @@ SWIFT_CC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/b
 	-target armv7-apple-ios7.0 \
 	-target-cpu armv7 \
 	-target-abi apcs-gnu \
-	-module-name SwiftTetris \
-	-sdk /Applications/Xcode6-Beta5.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk \
+	-module-name $(MODULE_NAME) \
+	-sdk $(XCODE)/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk \
 	-import-objc-header cocos-Bridge-Contents.h \
 	-emit-ir \
 	$(SWIFT_INCLUDES) \
-	-o $@ \
+	-o $(TARGET) \
 	-primary-file $(PRIMARY_FILE) $(SWIFT_SOURCES)
 
 # LLVM-IR -> .o compiler

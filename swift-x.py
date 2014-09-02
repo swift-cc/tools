@@ -15,7 +15,7 @@ def build_objc_sources(args, config, sources):
 	for s in sources:
 
 		# determine target
-		target = os.path.splitext(s)[0] + ".o"
+		target = os.path.splitext(s)[0] + ".ir"
 
 		# create the build command and replace unknowns
 		if s.endswith(".mm"):
@@ -24,8 +24,7 @@ def build_objc_sources(args, config, sources):
 			key = 'OBJC'
 		cc = get_var(key, config, {'TARGET' : target})
 		
-		if args.verbose > 0:
-			print cc + "\n"
+		print "EXEC: " + cc + "\n"
 
 def build_swift_sources(args, config, sources):
 	
@@ -41,13 +40,12 @@ def build_swift_sources(args, config, sources):
 		remain = ' '.join([v for v in sources if not v == s])
 
 		# determine target
-		target = os.path.splitext(s)[0] + ".o"
+		target = os.path.splitext(s)[0] + ".ir"
 
 		# create the build command and replace unknowns
 		cc = get_var('SWIFT_CC', config, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : target})
 		
-		if args.verbose > 0:
-			print cc + "\n"
+		print "EXEC: " + cc + "\n"
 
 
 def add_unresolved_symbols(config, unresolved, value):
