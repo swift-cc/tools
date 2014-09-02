@@ -73,8 +73,6 @@ def get_var(var, config, extra=None):
 		for s in list:
 			if s in config:
 				v = v.replace('$('+s+')', get_var(s, config))
-		if extra != None:
-			print "get_var: " + var + " => " + v
 		return v
 	return var
 
