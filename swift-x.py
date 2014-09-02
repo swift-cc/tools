@@ -3,6 +3,16 @@ import os
 import re
 import sys
 import argparse
+import subprocess
+
+def execute(command):
+	l = command.split()
+	try:
+		subprocess.check_output(l)
+		return True
+	except subprocess.CalledProcessError, e:
+		print l[0] + " output:\n", e.output
+		return False
 
 def build_objc_sources(args, config, sources):
 
@@ -21,11 +31,15 @@ def build_objc_sources(args, config, sources):
 		else:
 			key = 'OBJC'
 		cc = get_var(key, config, {'TARGET' : os.path.splitext(s)[0] + ".ir", 'SOURCE' : s})
-		print "EXEC: " + cc + "\n"
+		if False == execute(cc):
+			return False
 
 		# now to convert the IR to a .o
 		llc = get_var('ANDROID_LLC', config, {'TARGET' : os.path.splitext(s)[0] + ".o", 'SOURCE' : os.path.splitext(s)[0] + ".ir"})
-		print "EXEC: " + llc + "\n"
+		if False == execute(llc):
+			return False
+
+	return True
 
 
 def build_swift_sources(args, config, sources):
@@ -43,11 +57,15 @@ def build_swift_sources(args, config, sources):
 
 		# create the build command and replace unknowns
 		cc = get_var('SWIFT_CC', config, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : os.path.splitext(s)[0] + ".ir", 'SOURCE' : s})		
-		print "EXEC: " + cc + "\n"
+		if False == execute(cc):
+			return False
 
 		# now to convert the IR to a .o
 		llc = get_var('ANDROID_LLC', config, {'TARGET' : os.path.splitext(s)[0] + ".o", 'SOURCE' : os.path.splitext(s)[0] + ".ir"})
-		print "EXEC: " + llc + "\n"
+		if False == execute(llc):
+			return False
+
+	return True
 
 
 def add_unresolved_symbols(config, unresolved, value):
@@ -57,12 +75,14 @@ def add_unresolved_symbols(config, unresolved, value):
 			unresolved[s] = s
 	return unresolved
 
+
 def continuation_lines(fin):
     for line in fin:
         line = line.rstrip('\n')
         while line.endswith('\\'):
             line = line[:-1] + next(fin).rstrip('\n')
         yield line
+
 
 def get_var(var, config, extra=None):
 	if extra != None:
@@ -76,12 +96,14 @@ def get_var(var, config, extra=None):
 		return v
 	return var
 
+
 def expand_variables(args, config):
 	for kv in config.items():
 		config[kv[0]] = get_var(kv[0], config)
 		if args.verbose > 1:
 			print "expand_variables: " + kv[0] + "  =>  " + config[kv[0]]
 	return config
+
 			
 def parse_config(args, path):
 	config = {}
@@ -113,6 +135,7 @@ def parse_config(args, path):
 
 	return config
 
+
 def main():	
 
 	parser = argparse.ArgumentParser(description='Build swift and objective-c(++) sources for android')
@@ -133,8 +156,12 @@ def main():
 		elif a.endswith(".m") or a.endswith(".mm"):
 			objc_sources.append(a)
 
-	build_objc_sources(args, config, objc_sources)
-	build_swift_sources(args, config, swift_sources)
+	if False == build_objc_sources(args, config, objc_sources):
+		return False
+
+	if False == build_swift_sources(args, config, swift_sources):
+		return False
+
 
 if __name__ == "__main__":
     main()
