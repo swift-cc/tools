@@ -1,0 +1,54 @@
+
+# path to xcode application/toolchain
+XCODE = /Applications/Xcode6-Beta6.app 
+
+# path to android sdk
+ANDROID_SDK = /Users/justin/android/sdk
+
+# path to android ndk
+ANDROID_NDK = /Users/justin/android/android-ndk-r10
+
+# includes to add to 
+OBJC_INCLUDES = -I$(XCODE)/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk/usr/include
+SWIFT_INCLUDES = -Xcc -I.
+
+# options for compiling objective-c -> LLVM-IR
+OBJC = -c \
+	-emit-llvm \
+	-fno-short-enums \
+	-fPIC \
+	-isysroot $(SYSROOT) \
+	-DUSE_FILE32API -DCC_TARGET_OS_ANDROID -DCOCOS2D_DEBUG=1 -DCC_ENABLE_CHIPMUNK_INTEGRATION=1 \
+	-D_POSIX_C_SOURCE \
+	-D__NDK_FPABI__='' \
+	-DANDROID \
+	$(OBJC_INCLUDES) \
+	-S
+
+# options for compiling objective-c++ -> LLVM-IR
+OBJC_C++ = $(OBJC) -std=c++11
+
+# options for compiling swift -> LLVM-IR
+SWIFT_CC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift \
+	-frontend \
+	-c \
+	-enable-objc-attr-requires-objc-module \
+	-target armv7-apple-ios7.0 \
+	-target-cpu armv7 \
+	-target-abi apcs-gnu \
+	-module-name SwiftTetris \
+	-sdk /Applications/Xcode6-Beta5.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk \
+	-import-objc-header cocos-Bridge-Contents.h \
+	-emit-ir \
+	$(SWIFT_INCLUDES) \
+	-o $@ \
+	-primary-file $(PRIMARY_FILE) $(SWIFT_SOURCES)
+
+# LLVM-IR -> .o compiler
+ANDROID_LLC = $(ANDROID_NDK)/toolchains/llvm-3.4/prebuilt/darwin-x86_64/bin/llc --filetype=obj -mtriple=arm -relocation-model=pic
+
+# android linker
+ANDROID_LD = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-gcc-4.8
+
+
+
