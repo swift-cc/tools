@@ -1,4 +1,5 @@
 
+import os
 import re
 import sys
 import argparse
@@ -20,9 +21,12 @@ def build_swift_sources(args, config, sources):
 		# so we create a temp array that contains the remaining sources
 		remain = ' '.join([v for v in sources if not v == s])
 
+		# determine target
+		target = os.path.splitext(s)[0] + ".o"
+
 		# create the build command and replace unknowns
 		cc = config['SWIFT_CC']
-		cc = replace_var(cc, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain})
+		cc = replace_var(cc, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : target})
 		
 		if args.verbose > 0:
 			print cc
