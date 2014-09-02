@@ -5,16 +5,35 @@ import sys
 import argparse
 
 def build_objc_sources(args, config, sources):
+
 	if args.verbose > 0:
 		print "objc sources " + str(len(sources))
 		for s in sources:
 			print s
+		print "\n"
+
+	for s in sources:
+
+		# determine target
+		target = os.path.splitext(s)[0] + ".o"
+
+		# create the build command and replace unknowns
+		if s.endswith(".mm"):
+			cc = config['OBJC_C++']
+		else:
+			cc = config['OBJC']
+		cc = replace_var(cc, {'TARGET' : target})
+		
+		if args.verbose > 0:
+			print cc + "\n"
 
 def build_swift_sources(args, config, sources):
+	
 	if args.verbose > 0:
 		print "swift sources " + str(len(sources))
 		for s in sources:
 			print s
+		print "\n"
 
 	for s in sources:
 		# swift is weird in that you have to pass all sources when compiling each file
@@ -29,7 +48,7 @@ def build_swift_sources(args, config, sources):
 		cc = replace_var(cc, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : target})
 		
 		if args.verbose > 0:
-			print cc
+			print cc + "\n"
 
 
 def add_unresolved_symbols(unresolved, value):
@@ -62,7 +81,6 @@ def replace_var(value, config):
 def expand_variables(config):
 	for kv in config.items():
 		if kv[1].find("$") != -1:
-			print "expand_variables: " + kv[0] + "  =>  " + kv[1]
 			config[kv[0]] = replace_var(kv[1], config)
 	return config
 			
@@ -84,6 +102,8 @@ def parse_config(path):
 
 	for key in unresolved.keys():
 		print "unresolved symbol " + key
+	if len(unresolved):
+		print "\n"
 
 	return config
 
