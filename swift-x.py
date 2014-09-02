@@ -11,7 +11,8 @@ def execute(command):
 		subprocess.check_output(l)
 		return True
 	except subprocess.CalledProcessError, e:
-		print l[0] + " output:\n", e.output
+		print "Command: " + command + "\n"
+		print "Output : " + e.output + "\n"
 		return False
 
 def build_objc_sources(args, config, sources):
