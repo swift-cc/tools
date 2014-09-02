@@ -1,7 +1,7 @@
 
 // Test1.m
 
-#import "Foundation.h"
+#import "Foundation/Foundation.h"
 
 @interface Test1 : NSObject
 - (void) test;
@@ -10,7 +10,7 @@
 @implementation Test1
 - (void) test
 {
-    printf("Test1";
+    printf("Test1");
 }
 @end
 

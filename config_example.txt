@@ -12,7 +12,9 @@ ANDROID_SDK = /Users/justin/android/sdk
 ANDROID_NDK = /Users/justin/android/android-ndk-r10
 
 # includes to add to 
-OBJC_INCLUDES = -I$(XCODE)/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk/usr/include
+OBJC_INCLUDES = -I$(XCODE)/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator7.1.sdk/usr/include \
+				-I$(XCODE)/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/include \
+				-F$(XCODE)/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks
 SWIFT_INCLUDES = -Xcc -I.
 SYSROOT = .
 
@@ -20,19 +22,20 @@ SYSROOT = .
 INTRINSIC_SYMBOLS = \
 	PRIMARY_FILE \
 	TARGET \
+	SOURCE \
 	SWIFT_SOURCES 
 
 # options for compiling objective-c -> LLVM-IR
 OBJC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang \
 	-x objective-c++ \
 	-arch armv7 \
-	-c \
+	-c $(SOURCE) \
+	-framework Foundation \
 	-emit-llvm \
 	-fno-short-enums \
 	-fPIC \
 	-isysroot $(SYSROOT) \
 	-D_POSIX_C_SOURCE \
-	-D__NDK_FPABI__='' \
 	-DANDROID \
 	$(OBJC_INCLUDES) \
 	-o $(TARGET) \
@@ -58,7 +61,7 @@ SWIFT_CC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/b
 	-primary-file $(PRIMARY_FILE) $(SWIFT_SOURCES)
 
 # LLVM-IR -> .o compiler
-ANDROID_LLC = $(ANDROID_NDK)/toolchains/llvm-3.4/prebuilt/darwin-x86_64/bin/llc --filetype=obj -mtriple=arm -relocation-model=pic
+ANDROID_LLC = $(ANDROID_NDK)/toolchains/llvm-3.4/prebuilt/darwin-x86_64/bin/llc --filetype=obj -mtriple=arm -relocation-model=pic -o $(TARGET) $(SOURCE)
 
 # android linker
 ANDROID_LD = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-gcc-4.8
