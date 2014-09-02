@@ -19,10 +19,10 @@ def build_objc_sources(args, config, sources):
 
 		# create the build command and replace unknowns
 		if s.endswith(".mm"):
-			cc = config['OBJC_C++']
+			key = 'OBJC_C++'
 		else:
-			cc = config['OBJC']
-		cc = replace_var(cc, {'TARGET' : target})
+			key = 'OBJC'
+		cc = get_var(key, config, {'TARGET' : target})
 		
 		if args.verbose > 0:
 			print cc + "\n"
@@ -44,17 +44,17 @@ def build_swift_sources(args, config, sources):
 		target = os.path.splitext(s)[0] + ".o"
 
 		# create the build command and replace unknowns
-		cc = config['SWIFT_CC']
-		cc = replace_var(cc, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : target})
+		cc = get_var('SWIFT_CC', config, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : target})
 		
 		if args.verbose > 0:
 			print cc + "\n"
 
 
-def add_unresolved_symbols(unresolved, value):
+def add_unresolved_symbols(config, unresolved, value):
 	list = re.findall("\$\((.*?)\)", value)
 	for s in list:
-		unresolved[s] = s
+		if s not in config['INTRINSIC_SYMBOLS']:
+			unresolved[s] = s
 	return unresolved
 
 def continuation_lines(fin):
@@ -64,27 +64,28 @@ def continuation_lines(fin):
             line = line[:-1] + next(fin).rstrip('\n')
         yield line
 
-def get_var(var, config):
-	return config[var] if var in config else None
+def get_var(var, config, extra=None):
+	if extra != None:
+		config = dict(config.items() + extra.items())
+	if var in config:
+		v = config[var]
+		list = re.findall("\$\((.*?)\)", v)
+		for s in list:
+			if s in config:
+				v = v.replace('$('+s+')', get_var(s, config))
+		if extra != None:
+			print "get_var: " + var + " => " + v
+		return v
+	return var
 
-def replace_var(value, config):
-
-	#for kv in config.items():
-	#	print "replace_var: " + kv[0] + "  =>  " + kv[1]
-
-	list = re.findall("\$\((.*?)\)", value)
-	for s in list:
-		if s in config:
-			value = value.replace('$('+s+')', get_var(s, config))
-	return value
-
-def expand_variables(config):
+def expand_variables(args, config):
 	for kv in config.items():
-		if kv[1].find("$") != -1:
-			config[kv[0]] = replace_var(kv[1], config)
+		config[kv[0]] = get_var(kv[0], config)
+		if args.verbose > 1:
+			print "expand_variables: " + kv[0] + "  =>  " + config[kv[0]]
 	return config
 			
-def parse_config(path):
+def parse_config(args, path):
 	config = {}
 	with open("config.txt") as myfile:
 		for line in continuation_lines(myfile):
@@ -93,31 +94,42 @@ def parse_config(path):
 			name, var = line.partition("=")[::2]
 			var = ' '.join(var.split())
 			config[name.strip()] = var
-	config = expand_variables(config)
+
+	config = expand_variables(args, config)
+
+	if args.vars:
+		for kv in config.items():
+			print "var: " + kv[0] + "  =>  " + kv[1]
+
+	if 'INTRINSIC_SYMBOLS' in config:
+		config['INTRINSIC_SYMBOLS'] = config['INTRINSIC_SYMBOLS'].split()
 
 	unresolved = {}
 	for kv in config.items():
 		if "$" in kv[1]:
-			unresolved = add_unresolved_symbols(unresolved, kv[1])
+			unresolved = add_unresolved_symbols(config, unresolved, kv[1])
 
-	for key in unresolved.keys():
-		print "unresolved symbol " + key
-	if len(unresolved):
-		print "\n"
+	if args.verbose > 0:
+		for key in unresolved.keys():
+			print "unresolved symbol " + key
+		if len(unresolved):
+			print "\n"
 
 	return config
 
 def main():	
 
-	config = parse_config("config.txt")
-
-	swift_sources = []
-	objc_sources = []
-
 	parser = argparse.ArgumentParser(description='Build swift and objective-c(++) sources for android')
 	parser.add_argument('sources', metavar='S', nargs='+', help='source to compile')
 	parser.add_argument('-v', '--verbose', action='count', default=0)
+	parser.add_argument('-vars', action='count', help='dump expanded variables')
+
 	args = parser.parse_args()
+
+	config = parse_config(args, "config.txt")
+
+	swift_sources = []
+	objc_sources = []
 
 	for a in args.sources:
 		if a.endswith(".swift"):
