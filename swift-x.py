@@ -3,6 +3,31 @@ import re
 import sys
 import argparse
 
+def build_objc_sources(args, config, sources):
+	if args.verbose > 0:
+		print "objc sources " + str(len(sources))
+		for s in sources:
+			print s
+
+def build_swift_sources(args, config, sources):
+	if args.verbose > 0:
+		print "swift sources " + str(len(sources))
+		for s in sources:
+			print s
+
+	for s in sources:
+		# swift is weird in that you have to pass all sources when compiling each file
+		# so we create a temp array that contains the remaining sources
+		remain = ' '.join([v for v in sources if not v == s])
+
+		# create the build command and replace unknowns
+		cc = config['SWIFT_CC']
+		cc = replace_var(cc, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain})
+		
+		if args.verbose > 0:
+			print cc
+
+
 def add_unresolved_symbols(unresolved, value):
 	list = re.findall("\$\((.*?)\)", value)
 	for s in list:
@@ -17,37 +42,41 @@ def continuation_lines(fin):
         yield line
 
 def get_var(var, config):
-	return getattr(config, var) if hasattr(config, var) else None
+	return config[var] if var in config else None
 
 def replace_var(value, config):
+
+	#for kv in config.items():
+	#	print "replace_var: " + kv[0] + "  =>  " + kv[1]
+
 	list = re.findall("\$\((.*?)\)", value)
 	for s in list:
-		if hasattr(config, s):
-			return value.replace('$('+s+')', get_var(s, config))
+		if s in config:
+			value = value.replace('$('+s+')', get_var(s, config))
 	return value
 
 def expand_variables(config):
-	for key, value in vars(config).items():
-		if isinstance(value, str):
-			if value.find("$") != -1:
-				setattr(config, key, replace_var(value, config))
+	for kv in config.items():
+		if kv[1].find("$") != -1:
+			print "expand_variables: " + kv[0] + "  =>  " + kv[1]
+			config[kv[0]] = replace_var(kv[1], config)
 	return config
 			
 def parse_config(path):
-	myvars = {}
+	config = {}
 	with open("config.txt") as myfile:
 		for line in continuation_lines(myfile):
+			if line.startswith('#') or 0 == len(line):
+				continue
 			name, var = line.partition("=")[::2]
 			var = ' '.join(var.split())
-			myvars[name.strip()] = var
-	config = type("Names", (object,), myvars)
+			config[name.strip()] = var
 	config = expand_variables(config)
 
 	unresolved = {}
-	for key, value in vars(config).items():
-		if isinstance(value, str):
-			if "$" in value:
-				unresolved = add_unresolved_symbols(unresolved, value)
+	for kv in config.items():
+		if "$" in kv[1]:
+			unresolved = add_unresolved_symbols(unresolved, kv[1])
 
 	for key in unresolved.keys():
 		print "unresolved symbol " + key
@@ -72,13 +101,8 @@ def main():
 		elif a.endswith(".m") or a.endswith(".mm"):
 			objc_sources.append(a)
 
-	if args.verbose > 0:
-		print "swift sources " + str(len(swift_sources))
-		for s in swift_sources:
-			print s
-		print "objc sources " + str(len(objc_sources))
-		for s in objc_sources:
-			print s
+	build_objc_sources(args, config, objc_sources)
+	build_swift_sources(args, config, swift_sources)
 
 if __name__ == "__main__":
     main()
