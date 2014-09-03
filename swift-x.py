@@ -112,10 +112,8 @@ def expand_variables(args, config):
 			
 def parse_config(args, path):
 
-	fullpath = os.path.dirname(sys.argv[0]) + '/' + path
-
 	config = {}
-	with open(fullpath) as myfile:
+	with open(path) as myfile:
 		for line in continuation_lines(myfile):
 			if line.startswith('#') or 0 == len(line):
 				continue
@@ -153,7 +151,15 @@ def main():
 
 	args = parser.parse_args()
 
-	config = parse_config(args, "config.txt")
+	config = parse_config(args, os.path.dirname(sys.argv[0]) + '/' + "config.txt")
+
+	local = None
+	local_path = os.getcwd() + '/' + "config.txt"
+	if os.path.isfile(local_path):
+		local  = parse_config(args, local)
+
+	if None != local:
+		config = dict(config.items() + local.items())
 
 	swift_sources = []
 	objc_sources = []
