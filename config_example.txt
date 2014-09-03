@@ -30,7 +30,6 @@ OBJC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c
 	-x objective-c++ \
 	-arch armv7 \
 	-c $(SOURCE) \
-	-framework Foundation \
 	-emit-llvm \
 	-fno-short-enums \
 	-fPIC \
