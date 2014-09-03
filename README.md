@@ -17,13 +17,13 @@ The first stage uses clang or swift to compile source code and emit LLVM-IR code
 
 All of this is completely handled by the tool, and so the tool is super easy to use.
 
-    script-x file.mm file2.swift
+    script-x.py file.mm file2.swift
 
 This will produce file.o and file2.o which can be linked using the Android NDK library archiver or linker.
 
 For other info, use the following to get command line help.
 
-    script-x -h
+    script-x.py -h
  
 
 ### Installation
