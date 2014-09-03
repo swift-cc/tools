@@ -60,9 +60,10 @@ OBJC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c
 	-isysroot $(SYSROOT) \
 	-D_POSIX_C_SOURCE \
 	-DANDROID \
+	-D__arm__ \
+	-D__OBJC2__ \
 	$(OBJC_INCLUDES) \
-	-o $(TARGET) \
-	-S
+	-o $(TARGET)
 
 # options for compiling objective-c++ -> LLVM-IR
 OBJC_C++ = $(OBJC) -std=c++11
