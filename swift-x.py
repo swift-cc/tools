@@ -138,10 +138,17 @@ def expand_variables(args, config):
 		config[kv[0]] = get_var(kv[0], config)
 		if args.verbose > 1:
 			print "expand_variables: " + kv[0] + "  =>  " + config[kv[0]]
+
+	if 'INTRINSIC_SYMBOLS' in config:
+		config['INTRINSIC_SYMBOLS'] = config['INTRINSIC_SYMBOLS'].split()
+
 	return config
 
 			
-def parse_config(args, path, root_config=None):
+def parse_config(args, path):
+
+	if args.verbose > 0:
+		print "Parsing " + path
 
 	config = {}
 	with open(path) as myfile:
@@ -151,24 +158,6 @@ def parse_config(args, path, root_config=None):
 			name, var = line.partition("=")[::2]
 			var = ' '.join(var.split())
 			config[name.strip()] = var
-
-	config = expand_variables(args, config)
-
-	if args.vars:
-		for kv in config.items():
-			print "var: " + kv[0] + "  =>  " + kv[1]
-
-	if 'INTRINSIC_SYMBOLS' in config:
-		config['INTRINSIC_SYMBOLS'] = config['INTRINSIC_SYMBOLS'].split()
-
-	unresolved = {}
-	for kv in config.items():
-		if "$" in kv[1]:
-			unresolved = add_unresolved_symbols(config, unresolved, kv[1], root_config)
-
-	if len(unresolved):
-		for key in unresolved.keys():
-			print "unresolved symbol " + key
 
 	return config
 
@@ -187,10 +176,28 @@ def main():
 	local = None
 	local_path = os.getcwd() + '/' + "config.txt"
 	if os.path.isfile(local_path):
-		local  = parse_config(args, local_path, config)
+		local  = parse_config(args, local_path)
 
 	if None != local:
 		config = dict(config.items() + local.items())
+
+	# finally expand variables
+	config = expand_variables(args, config)
+
+	# display unresolved
+	unresolved = {}
+	for kv in config.items():
+		if "$" in kv[1]:
+			unresolved = add_unresolved_symbols(config, unresolved, kv[1])
+	if len(unresolved):
+		for key in unresolved.keys():
+			print "unresolved symbol " + key
+
+	# display vars
+	if args.vars:
+		for kv in config.items():
+			print "var: " + kv[0] + "  =>  " + str(kv[1])
+		return
 
 	swift_sources = []
 	objc_sources = []
