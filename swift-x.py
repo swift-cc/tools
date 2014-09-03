@@ -21,11 +21,10 @@ def execute(command):
 
 def build_objc_sources(args, config, sources):
 
-	if args.verbose > 0:
+	if args.verbose > 0 and len(sources):
 		print "objc sources " + str(len(sources))
 		for s in sources:
 			print s
-		print "\n"
 
 	for s in sources:
 
@@ -49,11 +48,10 @@ def build_objc_sources(args, config, sources):
 
 def build_swift_sources(args, config, sources):
 	
-	if args.verbose > 0:
+	if args.verbose > 0 and len(sources):
 		print "swift sources " + str(len(sources))
 		for s in sources:
 			print s
-		print "\n"
 
 	for s in sources:
 		# swift is weird in that you have to pass all sources when compiling each file
@@ -113,8 +111,11 @@ def expand_variables(args, config):
 
 			
 def parse_config(args, path):
+
+	fullpath = os.path.dirname(sys.argv[0]) + '/' + path
+
 	config = {}
-	with open("config.txt") as myfile:
+	with open(fullpath) as myfile:
 		for line in continuation_lines(myfile):
 			if line.startswith('#') or 0 == len(line):
 				continue
