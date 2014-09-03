@@ -95,10 +95,15 @@ def build_swift_sources(args, config, sources):
 	return True
 
 
-def add_unresolved_symbols(config, unresolved, value):
+def add_unresolved_symbols(config, unresolved, value, root_config=None):
 	list = re.findall("\$\((.*?)\)", value)
+	if root_config != None:
+		intrisics = get_var('INTRINSIC_SYMBOLS', root_config, config)
+	else:
+		intrisics = get_var('INTRINSIC_SYMBOLS', config)
+
 	for s in list:
-		if s not in config['INTRINSIC_SYMBOLS']:
+		if s not in intrisics:
 			unresolved[s] = s
 
 	return unresolved
@@ -117,6 +122,8 @@ def get_var(var, config, extra=None):
 		config = dict(config.items() + extra.items())
 	if var in config:
 		v = config[var]
+		if not isinstance(v, str): # we only expand strings
+			return v
 		list = re.findall("\$\((.*?)\)", v)
 		for s in list:
 			if s in config:
@@ -134,7 +141,7 @@ def expand_variables(args, config):
 	return config
 
 			
-def parse_config(args, path):
+def parse_config(args, path, root_config=None):
 
 	config = {}
 	with open(path) as myfile:
@@ -157,7 +164,7 @@ def parse_config(args, path):
 	unresolved = {}
 	for kv in config.items():
 		if "$" in kv[1]:
-			unresolved = add_unresolved_symbols(config, unresolved, kv[1])
+			unresolved = add_unresolved_symbols(config, unresolved, kv[1], root_config)
 
 	if len(unresolved):
 		for key in unresolved.keys():
@@ -180,7 +187,7 @@ def main():
 	local = None
 	local_path = os.getcwd() + '/' + "config.txt"
 	if os.path.isfile(local_path):
-		local  = parse_config(args, local)
+		local  = parse_config(args, local_path, config)
 
 	if None != local:
 		config = dict(config.items() + local.items())
