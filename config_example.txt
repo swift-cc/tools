@@ -49,15 +49,14 @@ SWIFT_CC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/b
 	-c \
 	-enable-objc-attr-requires-objc-module \
 	-target armv7-apple-ios7.0 \
-	-target-cpu armv7 \
+	-target-cpu cortex-a8 \
 	-target-abi apcs-gnu \
 	-module-name $(MODULE_NAME) \
-	-sdk $(XCODE)/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk \
-	-import-objc-header cocos-Bridge-Contents.h \
+	-sdk /Applications/Xcode6-Beta5.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk \
 	-emit-ir \
-	$(SWIFT_INCLUDES) \
 	-o $(TARGET) \
-	-primary-file $(PRIMARY_FILE) $(SWIFT_SOURCES)
+	-primary-file $(SOURCE) \
+	$(SWIFT_SOURCES)
 
 # LLVM-IR -> .o compiler
 ANDROID_LLC = $(ANDROID_NDK)/toolchains/llvm-3.4/prebuilt/darwin-x86_64/bin/llc --filetype=obj -mtriple=arm -relocation-model=pic -o $(TARGET) $(SOURCE)
