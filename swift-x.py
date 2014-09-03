@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#coding=utf-8
 
 import os
 import re
@@ -10,9 +12,12 @@ def execute(command):
 	try:
 		subprocess.check_output(l)
 		return True
+
 	except subprocess.CalledProcessError, e:
 		print "Command: " + command + "\n"
+		print "Output : " + e.output + "\n"
 		return False
+
 
 def build_objc_sources(args, config, sources):
 
@@ -73,6 +78,7 @@ def add_unresolved_symbols(config, unresolved, value):
 	for s in list:
 		if s not in config['INTRINSIC_SYMBOLS']:
 			unresolved[s] = s
+
 	return unresolved
 
 
@@ -94,6 +100,7 @@ def get_var(var, config, extra=None):
 			if s in config:
 				v = v.replace('$('+s+')', get_var(s, config))
 		return v
+		
 	return var
 
 
