@@ -46,8 +46,12 @@ SYSROOT = .
 INTRINSIC_SYMBOLS = \
 	PRIMARY_FILE \
 	TARGET \
+	TARGET_FILE \
 	SOURCE \
-	SWIFT_SOURCES 
+	SWIFT_SOURCES \
+	CWD
+
+OBJ = $(CWD)/obj
 
 # options for compiling objective-c -> LLVM-IR
 OBJC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang \
@@ -57,13 +61,15 @@ OBJC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c
 	-emit-llvm \
 	-fno-short-enums \
 	-fPIC \
+	-fblocks \
+	-Wdeprecated-objc-isa-usage \
 	-isysroot $(SYSROOT) \
 	-D_POSIX_C_SOURCE \
 	-DANDROID \
-	-D__arm__ \
-	-D__OBJC2__ \
-	$(OBJC_INCLUDES) \
-	-o $(TARGET)
+	-D__arm__=1 \
+	-D__OBJC2__=1 \
+ 	$(OBJC_INCLUDES) \
+	-o $(OBJ)/$(TARGET_FILE)
 
 # options for compiling objective-c++ -> LLVM-IR
 OBJC_C++ = $(OBJC) -std=c++11
@@ -74,12 +80,12 @@ SWIFT_CC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/b
 	-c \
 	-enable-objc-attr-requires-objc-module \
 	-target armv7-apple-ios7.0 \
-	-target-cpu cortex-a8 \
+	-target-cpu armv7 \
 	-target-abi apcs-gnu \
 	-module-name $(MODULE_NAME) \
 	-sdk /Applications/Xcode6-Beta5.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk \
 	-emit-ir \
-	-o $(TARGET) \
+	-o $(OBJ)/$(TARGET_FILE) \
 	-primary-file $(SOURCE) \
 	$(SWIFT_SOURCES)
 

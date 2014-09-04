@@ -56,18 +56,25 @@ def build_objc_sources(args, config, sources):
 
 	for s in sources:
 
+		ir_name = os.path.splitext(s)[0] + ".ir"
+		obj_name = os.path.splitext(s)[0] + ".o"
+
 		# create the build command and replace unknowns
 		# this is the first build step from .m(m) => IR
 		if s.endswith(".mm"):
 			key = 'OBJC_C++'
 		else:
 			key = 'OBJC'
-		cc = get_var(key, config, {'TARGET' : os.path.splitext(s)[0] + ".ir", 'SOURCE' : s})
+		cc = get_var(key, config, {'TARGET' : ir_name, \
+			                       'TARGET_FILE' : os.path.basename(ir_name), \
+			                       'SOURCE' : s})
 		if False == execute(args, cc):
 			return False
 
 		# now to convert the IR to a .o
-		llc = get_var('ANDROID_LLC', config, {'TARGET' : os.path.splitext(s)[0] + ".o", 'SOURCE' : os.path.splitext(s)[0] + ".ir"})
+		llc = get_var('ANDROID_LLC', config, {'TARGET' : obj_name, \
+						                      'TARGET_FILE' : os.path.basename(obj_name), \
+										      'SOURCE' : ir_name})
 		if False == execute(args, llc):
 			return False
 
@@ -86,13 +93,22 @@ def build_swift_sources(args, config, sources):
 		# so we create a temp array that contains the remaining sources
 		remain = ' '.join([v for v in sources if not v == s])
 
+		ir_name = os.path.splitext(s)[0] + ".ir"
+		obj_name = os.path.splitext(s)[0] + ".o"
+
 		# create the build command and replace unknowns
-		cc = get_var('SWIFT_CC', config, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : os.path.splitext(s)[0] + ".ir", 'SOURCE' : s})		
+		cc = get_var('SWIFT_CC', config, {'PRIMARY_FILE' : s, \
+										  'SWIFT_SOURCES' : remain, \
+										  'TARGET' : ir_name, \
+										  'TARGET_FILE' : os.path.basename(ir_name), \
+										  'SOURCE' : s})		
 		if False == execute(args, cc):
 			return False
 
 		# now to convert the IR to a .o
-		llc = get_var('ANDROID_LLC', config, {'TARGET' : os.path.splitext(s)[0] + ".o", 'SOURCE' : os.path.splitext(s)[0] + ".ir"})
+		llc = get_var('ANDROID_LLC', config, {'TARGET' : obj_name, \
+											  'TARGET_FILE' : os.path.basename(obj_name), \
+											  'SOURCE' : ir_name})
 		if False == execute(args, llc):
 			return False
 
