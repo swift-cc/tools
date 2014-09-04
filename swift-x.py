@@ -31,7 +31,11 @@ import sys
 import argparse
 import subprocess
 
-def execute(command):
+def execute(args, command):
+
+	if args.verbose > 0:
+		print "Executing command: " + command
+
 	l = command.split()
 	try:
 		subprocess.check_output(l)
@@ -59,12 +63,12 @@ def build_objc_sources(args, config, sources):
 		else:
 			key = 'OBJC'
 		cc = get_var(key, config, {'TARGET' : os.path.splitext(s)[0] + ".ir", 'SOURCE' : s})
-		if False == execute(cc):
+		if False == execute(args, cc):
 			return False
 
 		# now to convert the IR to a .o
 		llc = get_var('ANDROID_LLC', config, {'TARGET' : os.path.splitext(s)[0] + ".o", 'SOURCE' : os.path.splitext(s)[0] + ".ir"})
-		if False == execute(llc):
+		if False == execute(args, llc):
 			return False
 
 	return True
@@ -84,12 +88,12 @@ def build_swift_sources(args, config, sources):
 
 		# create the build command and replace unknowns
 		cc = get_var('SWIFT_CC', config, {'PRIMARY_FILE' : s, 'SWIFT_SOURCES' : remain, 'TARGET' : os.path.splitext(s)[0] + ".ir", 'SOURCE' : s})		
-		if False == execute(cc):
+		if False == execute(args, cc):
 			return False
 
 		# now to convert the IR to a .o
 		llc = get_var('ANDROID_LLC', config, {'TARGET' : os.path.splitext(s)[0] + ".o", 'SOURCE' : os.path.splitext(s)[0] + ".ir"})
-		if False == execute(llc):
+		if False == execute(args, llc):
 			return False
 
 	return True
@@ -180,6 +184,8 @@ def main():
 
 	if None != local:
 		config = dict(config.items() + local.items())
+
+	config['CWD'] = os.getcwd()
 
 	# finally expand variables
 	config = expand_variables(args, config)
