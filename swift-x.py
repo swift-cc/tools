@@ -67,14 +67,16 @@ def build_objc_sources(args, config, sources):
 			key = 'OBJC'
 		cc = get_var(key, config, {'TARGET' : ir_name, \
 			                       'TARGET_FILE' : os.path.basename(ir_name), \
-			                       'SOURCE' : s})
+			                       'SOURCE' : s, \
+			                       'SOURCE_FILE' : os.path.basename(s)})
 		if False == execute(args, cc):
 			return False
 
 		# now to convert the IR to a .o
 		llc = get_var('ANDROID_LLC', config, {'TARGET' : obj_name, \
 						                      'TARGET_FILE' : os.path.basename(obj_name), \
-										      'SOURCE' : ir_name})
+										      'SOURCE' : ir_name, \
+										      'SOURCE_FILE' : os.path.basename(ir_name)})
 		if False == execute(args, llc):
 			return False
 
@@ -101,14 +103,16 @@ def build_swift_sources(args, config, sources):
 										  'SWIFT_SOURCES' : remain, \
 										  'TARGET' : ir_name, \
 										  'TARGET_FILE' : os.path.basename(ir_name), \
-										  'SOURCE' : s})		
+										  'SOURCE' : s, \
+										  'SOURCE_FILE' : os.path.basename(s)})		
 		if False == execute(args, cc):
 			return False
 
 		# now to convert the IR to a .o
 		llc = get_var('ANDROID_LLC', config, {'TARGET' : obj_name, \
 											  'TARGET_FILE' : os.path.basename(obj_name), \
-											  'SOURCE' : ir_name})
+											  'SOURCE' : ir_name,
+											  'SOURCE_FILE' : os.path.basename(ir_name)})
 		if False == execute(args, llc):
 			return False
 
