@@ -56,6 +56,8 @@ def build_objc_sources(args, config, sources):
 
 	for s in sources:
 
+		print os.path.basename(s)
+
 		ir_name = os.path.splitext(s)[0] + ".ir"
 		obj_name = os.path.splitext(s)[0] + ".o"
 
@@ -91,6 +93,9 @@ def build_swift_sources(args, config, sources):
 			print s
 
 	for s in sources:
+
+		print os.path.basename(s)
+
 		# swift is weird in that you have to pass all sources when compiling each file
 		# so we create a temp array that contains the remaining sources
 		remain = ' '.join([v for v in sources if not v == s])
