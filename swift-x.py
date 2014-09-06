@@ -84,6 +84,23 @@ def build_objc_sources(args, config, sources):
 
 	return True
 
+def link_static_library(args, config, sources):
+
+	objects = []
+	for s in sources:
+		objects.append("obj/" + os.path.basename(os.path.splitext(s)[0] + ".o"))
+	objects = ' '.join(objects)
+
+	if args.verbose > 0:
+		print objects
+
+	ld = get_var('ANDROID_LD', config, {'OBJECTS' : objects})
+
+	if False == execute(args, ld):
+		return False
+
+	return True
+
 
 def build_swift_sources(args, config, sources):
 	
@@ -197,6 +214,7 @@ def main():
 	parser.add_argument('sources', metavar='S', nargs='+', help='source to compile')
 	parser.add_argument('-v', '--verbose', action='count', default=0)
 	parser.add_argument('-vars', action='count', help='dump expanded variables')
+	parser.add_argument('--lib', nargs='?', help='link into static library')
 
 	args = parser.parse_args()
 
@@ -245,6 +263,8 @@ def main():
 	if False == build_swift_sources(args, config, swift_sources):
 		return False
 
+	if args.lib:
+		return link_static_library(args, config, args.sources)
 
 if __name__ == "__main__":
     main()
