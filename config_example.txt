@@ -27,7 +27,7 @@
 MODULE_NAME = Test
 
 # path to xcode application/toolchain
-XCODE = /Applications/Xcode6-Beta6.app 
+XCODE = /Applications/Xcode6-Beta7.app 
 
 # path to android sdk
 ANDROID_SDK = /Users/justin/android/sdk
@@ -105,6 +105,9 @@ SWIFT_CC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/b
 
 # LLVM-IR -> .o compiler
 ANDROID_LLC = $(ANDROID_NDK)/toolchains/llvm-3.4/prebuilt/darwin-x86_64/bin/llc --filetype=obj -mtriple=arm -relocation-model=pic -o $(OBJ)/$(TARGET_FILE) $(OBJ)/$(SOURCE_FILE)
+
+# .s -> .o assembler
+ANDROID_AS = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/as -arch armv7 -I$(XCODE)/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/include $(SOURCE) -o $(OBJ)/$(TARGET_FILE)
 
 # android linker
 ANDROID_LD = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-gcc-4.8 -L$(ANDROID_NDK)/platforms/android-19/arch-arm/usr/lib -L$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/lib -lstdc++ -lc -ldl -lgcc $(OBJECTS)
