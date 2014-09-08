@@ -148,6 +148,30 @@ def build_asm_sources(args, config, sources):
 	return True
 
 
+def build_c_sources(args, config, sources):
+	
+	if args.verbose > 0 and len(sources):
+		print "c sources " + str(len(sources))
+		for s in sources:
+			print s
+
+	for s in sources:
+
+		print os.path.basename(s)
+
+		obj_name = os.path.splitext(s)[0] + ".o"
+
+		# create the build command and replace unknowns
+		cc = get_var('CC', config, {'TARGET' : obj_name, \
+								     'TARGET_FILE' : os.path.basename(obj_name), \
+									 'SOURCE' : s, \
+									 'SOURCE_FILE' : os.path.basename(s)})		
+		if False == execute(args, cc):
+			return False
+
+	return True
+
+
 def link_static_library(args, config, sources):
 
 	objects = []
@@ -276,14 +300,17 @@ def main():
 	swift_sources = []
 	objc_sources = []
 	asm_sources = []
+	c_sources = []
 
 	for a in args.sources:
 		if a.endswith(".swift"):
 			swift_sources.append(a)
-		elif a.endswith(".m") or a.endswith(".mm") or a.endswith(".c"):
+		elif a.endswith(".m") or a.endswith(".mm"):
 			objc_sources.append(a)
 		elif a.endswith(".s"):
 			asm_sources.append(a)
+		elif a.endswith(".c"):
+			c_sources.append(a)
 
 	if False == build_objc_sources(args, config, objc_sources):
 		return False
@@ -292,6 +319,9 @@ def main():
 		return False
 
 	if False == build_asm_sources(args, config, asm_sources):
+		return False
+
+	if False == build_c_sources(args, config, c_sources):
 		return False
 
 	if args.lib:
