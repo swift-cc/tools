@@ -280,7 +280,7 @@ def main():
 	for a in args.sources:
 		if a.endswith(".swift"):
 			swift_sources.append(a)
-		elif a.endswith(".m") or a.endswith(".mm"):
+		elif a.endswith(".m") or a.endswith(".mm") or a.endswith(".c"):
 			objc_sources.append(a)
 		elif a.endswith(".s"):
 			asm_sources.append(a)
