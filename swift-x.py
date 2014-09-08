@@ -162,7 +162,12 @@ def build_c_sources(args, config, sources):
 		ir_name = os.path.splitext(s)[0] + ".ir"
 		obj_name = os.path.splitext(s)[0] + ".o"
 
-		cc = get_var('CC', config, {'TARGET' : ir_name, \
+		if s.endswith(".cpp"):
+			key = 'CC++'
+		else:
+			key = 'CC'
+
+		cc = get_var(key, config, {'TARGET' : ir_name, \
 			                       'TARGET_FILE' : os.path.basename(ir_name), \
 			                       'SOURCE' : s, \
 			                       'SOURCE_FILE' : os.path.basename(s)})
@@ -317,7 +322,7 @@ def main():
 			objc_sources.append(a)
 		elif a.endswith(".s"):
 			asm_sources.append(a)
-		elif a.endswith(".c"):
+		elif a.endswith(".c") or a.endswith(".cpp"):
 			c_sources.append(a)
 
 	if False == build_objc_sources(args, config, objc_sources):
