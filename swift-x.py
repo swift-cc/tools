@@ -159,14 +159,22 @@ def build_c_sources(args, config, sources):
 
 		print os.path.basename(s)
 
+		ir_name = os.path.splitext(s)[0] + ".ir"
 		obj_name = os.path.splitext(s)[0] + ".o"
 
-		# create the build command and replace unknowns
-		cc = get_var('CC', config, {'TARGET' : obj_name, \
-								     'TARGET_FILE' : os.path.basename(obj_name), \
-									 'SOURCE' : s, \
-									 'SOURCE_FILE' : os.path.basename(s)})		
+		cc = get_var('CC', config, {'TARGET' : ir_name, \
+			                       'TARGET_FILE' : os.path.basename(ir_name), \
+			                       'SOURCE' : s, \
+			                       'SOURCE_FILE' : os.path.basename(s)})
 		if False == execute(args, cc):
+			return False
+
+		# now to convert the IR to a .o
+		llc = get_var('ANDROID_LLC', config, {'TARGET' : obj_name, \
+						                      'TARGET_FILE' : os.path.basename(obj_name), \
+										      'SOURCE' : ir_name, \
+										      'SOURCE_FILE' : os.path.basename(ir_name)})
+		if False == execute(args, llc):
 			return False
 
 	return True
