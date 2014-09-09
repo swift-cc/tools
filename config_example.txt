@@ -27,7 +27,7 @@
 MODULE_NAME = Test
 
 # path to xcode application/toolchain
-XCODE = /Applications/Xcode6-Beta7.app 
+XCODE = /Applications/Xcode6-GM.app 
 
 # path to android sdk
 ANDROID_SDK = /Users/justin/android/sdk
