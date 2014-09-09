@@ -1,29 +1,29 @@
 # Tools
 <b>
-## Swift-X
+## Swift-CC
 <b>
 ### Introduction
 
-swift-x is a python script that simplifies the compiling of Swift and Objective-C(++) code into object files.
+swift-cc is a python script that simplifies the compiling of Swift and Objective-C(++) code into object files.
 
 Once installed, you can easily compile any number of Swift and Objective-C(++) files into object files that are targeted for armv7.
 
 
 ###Overview
 
-swift-x is a two stage wrapper for clang and the swift compiler that uses the Android NDK tools to produce android compatible .o files.
+swift-cc is a two stage wrapper for clang and the swift compiler that uses the Android NDK tools to produce android compatible .o files.
 
 The first stage uses clang or swift to compile source code and emit LLVM-IR code which is passed to the Android second stage tools which compile the IR into .o files.
 
 All of this is completely handled by the tool, and so the tool is super easy to use.
 
-    script-x.py file.mm file2.swift
+    script-cc.py file.mm file2.swift
 
 This will produce file.o and file2.o which can be linked using the Android NDK library archiver or linker.
 
 For other info, use the following to get command line help.
 
-    script-x.py -h
+    script-cc.py -h
  
 
 ### Installation
@@ -32,7 +32,7 @@ In order to be able to use the tool from anywhere, i.e. in Android.mk or other m
 
 Open up your .bash_profile or whatever file you use for setting up your environment, and add the following line before the path export.
 
-    PATH=$PATH:<your path to swift-x.py>
+    PATH=$PATH:<your path to swift-cc.py>
     
 Remember to re-parse the profile using source .bash_profile or whatever your profile name is.
 
