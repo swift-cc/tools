@@ -38,7 +38,7 @@ def execute(args, command):
 
 	l = command.split()
 	try:
-		subprocess.check_output(l)
+		subprocess.check_output(l, stderr=subprocess.STDOUT)
 		return True
 
 	except subprocess.CalledProcessError, e:
