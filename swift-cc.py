@@ -127,7 +127,7 @@ def build_swift_sources(args, config, sources):
 def build_asm_sources(args, config, sources):
 	
 	if args.verbose > 0 and len(sources):
-		print "assembly sources " + str(len(sources))
+		print "asm sources " + str(len(sources))
 		for s in sources:
 			print s
 
@@ -135,18 +135,27 @@ def build_asm_sources(args, config, sources):
 
 		print os.path.basename(s)
 
+		ir_name = os.path.splitext(s)[0] + ".ir"
 		obj_name = os.path.splitext(s)[0] + ".o"
 
 		# create the build command and replace unknowns
-		asm = get_var('ANDROID_AS', config, {'TARGET' : obj_name, \
-										     'TARGET_FILE' : os.path.basename(obj_name), \
+		asm = get_var('ANDROID_AS', config, {'TARGET' : ir_name, \
+										     'TARGET_FILE' : os.path.basename(ir_name), \
 										     'SOURCE' : s, \
 										     'SOURCE_FILE' : os.path.basename(s)})		
 		if False == execute(args, asm):
 			return False
 
-	return True
+		# now to convert the IR to a .o
+		llc = get_var('ANDROID_LLC', config, {'TARGET' : obj_name, \
+											  'TARGET_FILE' : os.path.basename(obj_name), \
+											  'SOURCE' : ir_name,
+											  'SOURCE_FILE' : os.path.basename(ir_name)})
+		if False == execute(args, llc):
+			return False
 
+	return True
+	
 
 def build_c_sources(args, config, sources):
 	
