@@ -31,7 +31,11 @@ import sys
 import argparse
 import subprocess
 
-def execute(args, command):
+def execute(args, command, stage):
+
+	if None != args.stage and args.stage != str(stage):
+		print "Skipping stage " + str(stage)
+		return True
 
 	if args.verbose > 0:
 		print "Executing command: " + command
@@ -71,7 +75,7 @@ def build_objc_sources(args, config, sources):
 			                       'TARGET_FILE' : os.path.basename(ir_name), \
 			                       'SOURCE' : s, \
 			                       'SOURCE_FILE' : os.path.basename(s)})
-		if False == execute(args, cc):
+		if False == execute(args, cc, 1):
 			return False
 
 		# now to convert the IR to a .o
@@ -79,7 +83,7 @@ def build_objc_sources(args, config, sources):
 						                      'TARGET_FILE' : os.path.basename(obj_name), \
 										      'SOURCE' : ir_name, \
 										      'SOURCE_FILE' : os.path.basename(ir_name)})
-		if False == execute(args, llc):
+		if False == execute(args, llc, 2):
 			return False
 
 	return True
@@ -110,7 +114,7 @@ def build_swift_sources(args, config, sources):
 										  'TARGET_FILE' : os.path.basename(ir_name), \
 										  'SOURCE' : s, \
 										  'SOURCE_FILE' : os.path.basename(s)})		
-		if False == execute(args, cc):
+		if False == execute(args, cc, 1):
 			return False
 
 		# now to convert the IR to a .o
@@ -118,7 +122,7 @@ def build_swift_sources(args, config, sources):
 											  'TARGET_FILE' : os.path.basename(obj_name), \
 											  'SOURCE' : ir_name,
 											  'SOURCE_FILE' : os.path.basename(ir_name)})
-		if False == execute(args, llc):
+		if False == execute(args, llc, 2):
 			return False
 
 	return True
@@ -143,7 +147,7 @@ def build_asm_sources(args, config, sources):
 										     'TARGET_FILE' : os.path.basename(ir_name), \
 										     'SOURCE' : s, \
 										     'SOURCE_FILE' : os.path.basename(s)})		
-		if False == execute(args, asm):
+		if False == execute(args, asm, 1):
 			return False
 
 		# now to convert the IR to a .o
@@ -151,7 +155,7 @@ def build_asm_sources(args, config, sources):
 											  'TARGET_FILE' : os.path.basename(obj_name), \
 											  'SOURCE' : ir_name,
 											  'SOURCE_FILE' : os.path.basename(ir_name)})
-		if False == execute(args, llc):
+		if False == execute(args, llc, 2):
 			return False
 
 	return True
@@ -180,7 +184,7 @@ def build_c_sources(args, config, sources):
 			                       'TARGET_FILE' : os.path.basename(ir_name), \
 			                       'SOURCE' : s, \
 			                       'SOURCE_FILE' : os.path.basename(s)})
-		if False == execute(args, cc):
+		if False == execute(args, cc, 1):
 			return False
 
 		# now to convert the IR to a .o
@@ -188,7 +192,7 @@ def build_c_sources(args, config, sources):
 						                      'TARGET_FILE' : os.path.basename(obj_name), \
 										      'SOURCE' : ir_name, \
 										      'SOURCE_FILE' : os.path.basename(ir_name)})
-		if False == execute(args, llc):
+		if False == execute(args, llc, 2):
 			return False
 
 	return True
@@ -286,6 +290,7 @@ def main():
 	parser.add_argument('-v', '--verbose', action='count', default=0)
 	parser.add_argument('-vars', action='count', help='dump expanded variables')
 	parser.add_argument('--lib', nargs='?', help='link into static library')
+	parser.add_argument('-stage', nargs='?', help='which stage number to run')
 
 	args = parser.parse_args()
 
