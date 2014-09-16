@@ -210,7 +210,7 @@ def link_static_library(args, config, sources):
 
 	ld = get_var('ANDROID_LD', config, {'OBJECTS' : objects})
 
-	if False == execute(args, ld):
+	if False == execute(args, ld, None):
 		return False
 
 	return True
