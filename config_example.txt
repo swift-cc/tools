@@ -164,15 +164,16 @@ CC++ = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c
 # LLVM-IR -> .o compiler
 ANDROID_LLC = $(ANDROID_NDK)/toolchains/llvm-3.4/prebuilt/darwin-x86_64/bin/llc --filetype=obj -mtriple=arm -relocation-model=pic -o $(OBJ)/$(TARGET_FILE) $(OBJ)/$(SOURCE_FILE)
 
-# .s -> .o assembler
+# .s -> .ir assembler
 ANDROID_AS = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang \
 	-x assembler-with-cpp \
 	-arch armv7 \
-	-c $(SOURCE) \
-	-emit-llvm \
+	-S $(SOURCE) \
+	-flto -emit-llvm \
 	-isysroot $(XCODE)/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk \
 	-Iusr/include \
 	-Iusr/include/system \
+	-no-integrated-as \
 	-o $(OBJ)/$(TARGET_FILE)
 
 # android linker
