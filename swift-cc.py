@@ -260,9 +260,6 @@ def expand_variables(args, config):
 		if args.verbose > 1:
 			print "expand_variables: " + kv[0] + "  =>  " + config[kv[0]]
 
-	if 'INTRINSIC_SYMBOLS' in config:
-		config['INTRINSIC_SYMBOLS'] = config['INTRINSIC_SYMBOLS'].split()
-
 	return config
 
 			
@@ -291,6 +288,7 @@ def main():
 	parser.add_argument('-vars', action='count', help='dump expanded variables')
 	parser.add_argument('--lib', nargs='?', help='link into static library')
 	parser.add_argument('-stage', nargs='?', help='which stage number to run')
+	parser.add_argument('-x', nargs='?', help='execute argument after evaluating it')
 
 	args = parser.parse_args()
 
@@ -309,6 +307,9 @@ def main():
 	# finally expand variables
 	config = expand_variables(args, config)
 
+	if 'INTRINSIC_SYMBOLS' in config:
+		config['INTRINSIC_SYMBOLS'] = config['INTRINSIC_SYMBOLS'].split()
+
 	# display unresolved
 	unresolved = {}
 	for kv in config.items():
@@ -323,6 +324,13 @@ def main():
 		for kv in config.items():
 			print "var: " + kv[0] + "  =>  " + str(kv[1])
 		return
+
+	# execute commands
+	if args.x:
+		temp = config
+		temp['command'] = args.x
+		temp = expand_variables(args, temp)
+		execute(args, temp['command'], None)
 
 	swift_sources = []
 	objc_sources = []
