@@ -139,23 +139,14 @@ def build_asm_sources(args, config, sources):
 
 		print os.path.basename(s)
 
-		ir_name = os.path.splitext(s)[0] + ".ir"
 		obj_name = os.path.splitext(s)[0] + ".o"
 
 		# create the build command and replace unknowns
-		asm = get_var('ANDROID_AS', config, {'TARGET' : ir_name, \
-										     'TARGET_FILE' : os.path.basename(ir_name), \
+		asm = get_var('ANDROID_AS', config, {'TARGET' : obj_name, \
+										     'TARGET_FILE' : os.path.basename(obj_name), \
 										     'SOURCE' : s, \
 										     'SOURCE_FILE' : os.path.basename(s)})		
 		if False == execute(args, asm, 1):
-			return False
-
-		# now to convert the IR to a .o
-		llc = get_var('ANDROID_LLC', config, {'TARGET' : obj_name, \
-											  'TARGET_FILE' : os.path.basename(obj_name), \
-											  'SOURCE' : ir_name,
-											  'SOURCE_FILE' : os.path.basename(ir_name)})
-		if False == execute(args, llc, 2):
 			return False
 
 	return True
@@ -337,15 +328,16 @@ def main():
 	asm_sources = []
 	c_sources = []
 
-	for a in args.sources:
-		if a.endswith(".swift"):
-			swift_sources.append(a)
-		elif a.endswith(".m") or a.endswith(".mm"):
-			objc_sources.append(a)
-		elif a.endswith(".s"):
-			asm_sources.append(a)
-		elif a.endswith(".c") or a.endswith(".cpp"):
-			c_sources.append(a)
+	if args.sources:
+		for a in args.sources:
+			if a.endswith(".swift"):
+				swift_sources.append(a)
+			elif a.endswith(".m") or a.endswith(".mm"):
+				objc_sources.append(a)
+			elif a.endswith(".s"):
+				asm_sources.append(a)
+			elif a.endswith(".c") or a.endswith(".cpp"):
+				c_sources.append(a)
 
 	if False == build_objc_sources(args, config, objc_sources):
 		return False
