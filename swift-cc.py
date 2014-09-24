@@ -29,9 +29,10 @@ import os
 import re
 import sys
 import argparse
-import subprocess
 
 def execute(args, command, stage):
+
+	from subprocess import call
 
 	if None != args.stage and args.stage != str(stage):
 		print "Skipping stage " + str(stage)
@@ -42,7 +43,7 @@ def execute(args, command, stage):
 
 	l = command.split()
 	try:
-		subprocess.check_output(l, stderr=subprocess.STDOUT)
+		call(l)
 		return True
 
 	except subprocess.CalledProcessError, e:
@@ -273,8 +274,8 @@ def parse_config(args, path):
 
 def main():	
 
-	parser = argparse.ArgumentParser(description='Build swift and objective-c(++) sources for android')
-	parser.add_argument('sources', metavar='S', nargs='+', help='source to compile')
+	parser = argparse.ArgumentParser(description='Build swift, objective-c(++), c(++), assembly sources for android')
+	parser.add_argument('sources', metavar='...', nargs=argparse.REMAINDER, help='sources to compile')
 	parser.add_argument('-v', '--verbose', action='count', default=0)
 	parser.add_argument('-vars', action='count', help='dump expanded variables')
 	parser.add_argument('--lib', nargs='?', help='link into static library')
@@ -322,6 +323,7 @@ def main():
 		temp['command'] = args.x
 		temp = expand_variables(args, temp)
 		execute(args, temp['command'], None)
+		return
 
 	swift_sources = []
 	objc_sources = []
