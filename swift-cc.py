@@ -29,10 +29,9 @@ import os
 import re
 import sys
 import argparse
+import subprocess
 
 def execute(args, command, stage):
-
-	from subprocess import call
 
 	if None != args.stage and args.stage != str(stage):
 		print "Skipping stage " + str(stage)
@@ -41,9 +40,8 @@ def execute(args, command, stage):
 	if args.verbose > 0:
 		print "Executing command: " + command
 
-	l = command.split()
 	try:
-		call(l)
+		subprocess.call(command, shell=True)
 		return True
 
 	except subprocess.CalledProcessError, e:
