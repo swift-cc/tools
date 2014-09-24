@@ -43,7 +43,6 @@ SYSROOT = .
 # standard symbol defined
 DEFINES = \
 	-D_POSIX_SOURCE \
-	-D_DARWIN_C_SOURCE \
 	-DANDROID \
 	-D__arm__=1 \
 	-D__OBJC2__=1 \
