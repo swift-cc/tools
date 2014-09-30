@@ -371,7 +371,7 @@ def main():
 
 	if args.lib:
 		return link_static_library(args, config, args.sources)
-	else if args.exe:
+	elif args.exe:
 		return link_executable(args, config, args.sources)
 
 if __name__ == "__main__":
