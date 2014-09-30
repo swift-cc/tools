@@ -1,0 +1,174 @@
+
+#****************************************************************************
+# Copyright (c) 2014 Chukong Technologies Inc.
+#
+# http://www.cocos2d-x.org
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#****************************************************************************
+
+# module name
+MODULE_NAME = Test
+
+# path to xcode application/toolchain
+XCODE = /Applications/Xcode6.1-Beta2.app 
+
+# path to android sdk
+ANDROID_SDK = /Users/justin/android/sdk
+
+# path to android ndk
+ANDROID_NDK = /Users/justin/android/android-ndk-r10
+
+# includes to add to 
+OBJC_INCLUDES = -I$(CWD)/.
+SWIFT_INCLUDES = -Xcc -I$(CWD)/.
+SYSROOT = .
+
+# standard symbol defined
+DEFINES = \
+	-D_POSIX_SOURCE \
+	-DANDROID \
+	-D__arm__=1 \
+	-D__OBJC2__=1 \
+	-DLIBC_NO_LIBCRASHREPORTERCLIENT \
+	-DVARIANT_DYLD \
+	-D_ARM_ARCH_7=1 \
+	-D__DARWIN_UNIX03=1 \
+	-DPRIVATE=1
+
+# built in symbols
+INTRINSIC_SYMBOLS = \
+	PRIMARY_FILE \
+	TARGET \
+	TARGET_FILE \
+	SOURCE \
+	SOURCE_FILE \
+	SWIFT_SOURCES \
+	OBJECTS \
+	CWD
+
+OBJ = $(CWD)/obj
+
+# options for compiling objective-c -> LLVM-IR
+OBJC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang \
+	-x objective-c++ \
+	-arch armv7 \
+	-c $(SOURCE) \
+	-emit-llvm \
+	-fno-short-enums \
+	-fPIC \
+	-fblocks \
+	-fmessage-length=0 \
+	-fdiagnostics-show-note-include-stack \
+	-fmacro-backtrace-limit=0 \
+	-fdollars-in-identifiers \
+	-fpascal-strings \
+	-fstrict-aliasing \
+	-fvisibility=default \
+	-miphoneos-version-min=5.1.1 \
+	-Wimplicit-function-declaration \
+	-isysroot $(SYSROOT) \
+	$(DEFINES) \
+	-objcmt-migrate-all \
+ 	$(OBJC_INCLUDES) \
+ 	-v \
+	-o $(OBJ)/$(TARGET_FILE)
+
+# options for compiling objective-c++ -> LLVM-IR
+OBJC_C++ = $(OBJC) -std=c++11
+
+# options for compiling swift -> LLVM-IR
+SWIFT_CC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift \
+	-frontend \
+	-c \
+	-target armv7-apple-ios7.0 \
+	-module-name $(MODULE_NAME) \
+	-sdk /Applications/Xcode6-Beta5.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS8.0.sdk \
+	-emit-ir \
+	-o $(OBJ)/$(TARGET_FILE) \
+	-primary-file $(SOURCE) \
+	$(SWIFT_SOURCES)
+
+# options for compiling c -> LLVM-IR
+CC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang \
+	-x c \
+	-arch armv7 \
+	-c $(SOURCE) \
+	-emit-llvm \
+	-fno-short-enums \
+	-fPIC \
+	-fblocks \
+	-fmessage-length=0 \
+	-fdiagnostics-show-note-include-stack \
+	-fmacro-backtrace-limit=0 \
+	-fdollars-in-identifiers \
+	-fpascal-strings \
+	-fstrict-aliasing \
+	-fvisibility=default \
+	-miphoneos-version-min=5.1.1 \
+	-Wimplicit-function-declaration \
+	-isysroot $(SYSROOT) \
+	$(DEFINES) \
+	-objcmt-migrate-all \
+ 	$(OBJC_INCLUDES) \
+ 	-v \
+ 	-H \
+	-o $(OBJ)/$(TARGET_FILE)
+
+# options for compiling c++ -> LLVM-IR
+CC++ = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang \
+	-x c++ \
+	-arch armv7 \
+	-c $(SOURCE) \
+	-emit-llvm \
+	-fno-short-enums \
+	-fPIC \
+	-fblocks \
+	-fmessage-length=0 \
+	-fdiagnostics-show-note-include-stack \
+	-fmacro-backtrace-limit=0 \
+	-fdollars-in-identifiers \
+	-fpascal-strings \
+	-fstrict-aliasing \
+	-fvisibility=hidden \
+	-miphoneos-version-min=5.1.1 \
+	-Wimplicit-function-declaration \
+	-isysroot $(SYSROOT) \
+	$(DEFINES) \
+	-objcmt-migrate-all \
+ 	$(OBJC_INCLUDES) \
+ 	-v \
+ 	-std=c++11 \
+	-o $(OBJ)/$(TARGET_FILE)
+
+# LLVM-IR -> .o compiler
+ANDROID_LLC = $(ANDROID_NDK)/toolchains/llvm-3.4/prebuilt/darwin-x86_64/bin/llc --filetype=obj -mtriple=arm -relocation-model=pic -o $(OBJ)/$(TARGET_FILE) $(OBJ)/$(SOURCE_FILE)
+
+# .s -> .o assembler
+ANDROID_AS = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-as \
+	$(SOURCE) \
+	-o $(OBJ)/$(TARGET_FILE)
+
+# android linker
+ANDROID_LD_LIB = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-ld --unresolved-symbols ignore-all -L$(ANDROID_NDK)/platforms/android-19/arch-arm/usr/lib -L$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/lib/gcc/arm-linux-androideabi/4.8 -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi-v7a -lstdc++ -lc -ldl -lgcc $(OBJECTS) -shared --export-dynamic -o $(TARGET)
+
+ANDROID_LD_EXE = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-ld --unresolved-symbols ignore-all -L$(ANDROID_NDK)/platforms/android-19/arch-arm/usr/lib -L$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/lib/gcc/arm-linux-androideabi/4.8 -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi-v7a -lstdc++ -lc -ldl -lgcc $(OBJECTS) -o $(TARGET)
+
+
+

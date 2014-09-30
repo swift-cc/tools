@@ -198,13 +198,30 @@ def link_static_library(args, config, sources):
 	if args.verbose > 0:
 		print objects
 
-	ld = get_var('ANDROID_LD', config, {'OBJECTS' : objects})
+	ld = get_var('ANDROID_LD_LIB', config, {'OBJECTS' : objects, 'TARGET' : args.lib})
 
 	if False == execute(args, ld, None):
 		return False
 
 	return True
 
+
+def link_executable(args, config, sources):
+
+	objects = []
+	for s in sources:
+		objects.append("obj/" + os.path.basename(os.path.splitext(s)[0] + ".o"))
+	objects = ' '.join(objects)
+
+	if args.verbose > 0:
+		print objects
+
+	ld = get_var('ANDROID_LD_EXE', config, {'OBJECTS' : objects, 'TARGET' : args.exe})
+
+	if False == execute(args, ld, None):
+		return False
+
+	return True
 
 def add_unresolved_symbols(config, unresolved, value, root_config=None):
 	list = re.findall("\$\((.*?)\)", value)
@@ -277,6 +294,7 @@ def main():
 	parser.add_argument('-v', '--verbose', action='count', default=0)
 	parser.add_argument('-vars', action='count', help='dump expanded variables')
 	parser.add_argument('--lib', nargs='?', help='link into static library')
+	parser.add_argument('--exe', nargs='?', help='link into executable')
 	parser.add_argument('-stage', nargs='?', help='which stage number to run')
 	parser.add_argument('-x', nargs='?', help='execute argument after evaluating it')
 
@@ -353,6 +371,8 @@ def main():
 
 	if args.lib:
 		return link_static_library(args, config, args.sources)
+	else if args.exe:
+		return link_executable(args, config, args.sources)
 
 if __name__ == "__main__":
     main()
