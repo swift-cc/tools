@@ -166,7 +166,7 @@ ANDROID_AS = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin
 	-o $(OBJ)/$(TARGET_FILE)
 
 # android linker
-ANDROID_LD = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-ld --unresolved-symbols ignore-all -L$(ANDROID_NDK)/platforms/android-19/arch-arm/usr/lib -L$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/lib/gcc/arm-linux-androideabi/4.8 -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi-v7a -lstdc++ -lc -ldl -lgcc $(OBJECTS) -shared --export-dynamic -o libobjc-rt.so
+ANDROID_LD_LIB = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-ld --unresolved-symbols ignore-all -L$(ANDROID_NDK)/platforms/android-19/arch-arm/usr/lib -L$(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64/lib/gcc/arm-linux-androideabi/4.8 -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi-v7a -lstdc++ -lc -ldl -lgcc $(OBJECTS) -shared --export-dynamic -o $(TARGET)
 
 
 
