@@ -43,6 +43,7 @@ SYSROOT = .
 # standard symbol defined
 DEFINES = \
 	-D_POSIX_SOURCE \
+	-D_DARWIN_C_SOURCE \
 	-DANDROID \
 	-D__arm__=1 \
 	-D__OBJC2__=1 \
@@ -87,7 +88,7 @@ OBJC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c
 	$(DEFINES) \
 	-objcmt-migrate-all \
  	$(OBJC_INCLUDES) \
- 	-v \
+	-v \
 	-o $(OBJ)/$(TARGET_FILE)
 
 # options for compiling objective-c++ -> LLVM-IR
@@ -127,8 +128,7 @@ CC = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cla
 	$(DEFINES) \
 	-objcmt-migrate-all \
  	$(OBJC_INCLUDES) \
- 	-v \
- 	-H \
+	-v \
 	-o $(OBJ)/$(TARGET_FILE)
 
 # options for compiling c++ -> LLVM-IR
@@ -153,8 +153,8 @@ CC++ = $(XCODE)/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c
 	$(DEFINES) \
 	-objcmt-migrate-all \
  	$(OBJC_INCLUDES) \
- 	-v \
  	-std=c++11 \
+	-v \
 	-o $(OBJ)/$(TARGET_FILE)
 
 # LLVM-IR -> .o compiler
