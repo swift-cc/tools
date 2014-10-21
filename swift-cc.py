@@ -206,6 +206,24 @@ def link_static_library(args, config, sources):
 	return True
 
 
+def link_dynamic_library(args, config, sources):
+
+	objects = []
+	for s in sources:
+		objects.append("obj/" + os.path.basename(os.path.splitext(s)[0] + ".o"))
+	objects = ' '.join(objects)
+
+	if args.verbose > 0:
+		print objects
+
+	ld = get_var('ANDROID_LD_SHARED', config, {'OBJECTS' : objects, 'TARGET' : args.shared})
+
+	if False == execute(args, ld, None):
+		return False
+
+	return True
+
+
 def link_executable(args, config, sources):
 
 	objects = []
@@ -294,6 +312,7 @@ def main():
 	parser.add_argument('-v', '--verbose', action='count', default=0)
 	parser.add_argument('-vars', action='count', help='dump expanded variables')
 	parser.add_argument('--lib', nargs='?', help='link into static library')
+	parser.add_argument('--shared', nargs='?', help='link into shared object')
 	parser.add_argument('--exe', nargs='?', help='link into executable')
 	parser.add_argument('-stage', nargs='?', help='which stage number to run')
 	parser.add_argument('-x', nargs='?', help='execute argument after evaluating it')
@@ -369,7 +388,9 @@ def main():
 	if False == build_c_sources(args, config, c_sources):
 		return False
 
-	if args.lib:
+	if args.shared:
+		return link_dynamic_library(args, config, args.sources)
+	elif args.lib:
 		return link_static_library(args, config, args.sources)
 	elif args.exe:
 		return link_executable(args, config, args.sources)
